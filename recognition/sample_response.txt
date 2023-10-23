@@ -1,0 +1,175 @@
+label_annotations {
+    mid: "/m/06rrc"
+    description: "Shoe"
+    score: 0.946671844
+    topicality: 0.946671844
+  }
+  label_annotations {
+    mid: "/m/01ssh5"
+    description: "Shoulder"
+    score: 0.938802063
+    topicality: 0.938802063
+  }
+  label_annotations {
+    mid: "/m/0hgn_pr"
+    description: "Active pants"
+    score: 0.887187123
+    topicality: 0.887187123
+  }
+  label_annotations {
+    mid: "/m/062581"
+    description: "Sleeve"
+    score: 0.872450471
+    topicality: 0.872450471
+  }
+  label_annotations {
+    mid: "/m/031974"
+    description: "Waist"
+    score: 0.867000341
+    topicality: 0.867000341
+  }
+  label_annotations {
+    mid: "/m/019swr"
+    description: "Knee"
+    score: 0.860720336
+    topicality: 0.860720336
+  }
+  label_annotations {
+    mid: "/m/036k5h"
+    description: "Grey"
+    score: 0.842899919
+    topicality: 0.842899919
+  }
+  label_annotations {
+    mid: "/m/01j04m"
+    description: "Thigh"
+    score: 0.835268497
+    topicality: 0.835268497
+  }
+  label_annotations {
+    mid: "/m/017ftj"
+    description: "Sunglasses"
+    score: 0.822622418
+    topicality: 0.822622418
+  }
+  label_annotations {
+    mid: "/m/013s93"
+    description: "T-shirt"
+    score: 0.816493273
+    topicality: 0.816493273
+  }
+  localized_object_annotations {
+    mid: "/m/07mhn"
+    name: "Pants"
+    score: 0.937381744
+    bounding_poly {
+      normalized_vertices {
+        x: 0.363760024
+        y: 0.463744909
+      }
+      normalized_vertices {
+        x: 0.631869197
+        y: 0.463744909
+      }
+      normalized_vertices {
+        x: 0.631869197
+        y: 0.927339256
+      }
+      normalized_vertices {
+        x: 0.363760024
+        y: 0.927339256
+      }
+    }
+  }
+  localized_object_annotations {
+    mid: "/m/03gx245"
+    name: "Top"
+    score: 0.930030942
+    bounding_poly {
+      normalized_vertices {
+        x: 0.310495138
+        y: 0.151307106
+      }
+      normalized_vertices {
+        x: 0.644208
+        y: 0.151307106
+      }
+      normalized_vertices {
+        x: 0.644208
+        y: 0.508282721
+      }
+      normalized_vertices {
+        x: 0.310495138
+        y: 0.508282721
+      }
+    }
+  }
+  localized_object_annotations {
+    mid: "/m/01g317"
+    name: "Person"
+    score: 0.916740239
+    bounding_poly {
+      normalized_vertices {
+        x: 0.272800803
+        y: 0.00128541549
+      }
+      normalized_vertices {
+        x: 0.653934658
+        y: 0.00128541549
+      }
+      normalized_vertices {
+        x: 0.653934658
+        y: 0.997395813
+      }
+      normalized_vertices {
+        x: 0.272800803
+        y: 0.997395813
+      }
+    }
+  }
+  localized_object_annotations {
+    mid: "/m/02dl1y"
+    name: "Hat"
+    score: 0.643697262
+    bounding_poly {
+      normalized_vertices {
+        x: 0.22003305
+        y: 0.49341473
+      }
+      normalized_vertices {
+        x: 0.398300856
+        y: 0.49341473
+      }
+      normalized_vertices {
+        x: 0.398300856
+        y: 0.736129761
+      }
+      normalized_vertices {
+        x: 0.22003305
+        y: 0.736129761
+      }
+    }
+  }
+  localized_object_annotations {
+    mid: "/m/06rrc"
+    name: "Shoe"
+    score: 0.601296306
+    bounding_poly {
+      normalized_vertices {
+        x: 0.522084236
+        y: 0.86683774
+      }
+      normalized_vertices {
+        x: 0.600141346
+        y: 0.86683774
+      }
+      normalized_vertices {
+        x: 0.600141346
+        y: 0.990832388
+      }
+      normalized_vertices {
+        x: 0.522084236
+        y: 0.990832388
+      }
+    }
+  }

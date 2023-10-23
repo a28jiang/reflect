@@ -1,6 +1,8 @@
 from typing import List
 
-from fastapi import Depends, FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException, File, UploadFile
+from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 
 from database import crud, models, schemas
@@ -10,6 +12,24 @@ models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
+# Enable CORS (Cross-Origin Resource Sharing) to allow requests from your Raspberry Pi
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://raspberry_pi_ip"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+@app.post("/upload_image/")
+async def upload_image(image: UploadFile):
+    with open(f"received_{image.filename}", "wb") as file:
+        content = file.read()
+    
+    # TODO: Add Cloud Vision Processing
+    # processImage(content)
+    
+    return JSONResponse(content={"message": "Image received"})
 
 # Dependency
 def get_db():
