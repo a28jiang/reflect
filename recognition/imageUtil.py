@@ -5,11 +5,15 @@ import shutil
 # Temporary folder to save cropped images
 output_directory = "./recognition/processing"
 
+
 def cropImage(imagePath, object):
     image = Image.open(imagePath)
-    vertices = object['boundingPoly']['normalizedVertices']
+    vertices = object["boundingPoly"]["normalizedVertices"]
     width, height = image.size
-    vertices = [(int(vertices[i]['x'] * width), int(vertices[i]['y'] * height)) for i in range(4)]
+    vertices = [
+        (int(vertices[i]["x"] * width), int(vertices[i]["y"] * height))
+        for i in range(4)
+    ]
     crop = image.crop((vertices[0][0], vertices[0][1], vertices[2][0], vertices[2][1]))
 
     # Create the output directory if it doesn't exist
@@ -17,7 +21,8 @@ def cropImage(imagePath, object):
         os.makedirs(output_directory)
 
     crop.save(f"{output_directory}/{object['name']}.png")
-    return object['name']
+    return object["name"]
+
 
 def deleteFolder(folderPath):
     try:

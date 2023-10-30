@@ -4,17 +4,31 @@ from google.cloud import vision
 import json
 
 
+# Scaffold for backend flow
 def testNestedImageCropCalls():
-        with open('./recognition/test/sample.json', 'r') as json_file:
-                data = json.load(json_file)
+    # Load dummy data
+    with open("./recognition/test/sample_initial_call.json", "r") as json_file:
+        data = json.load(json_file)
 
-        for object in data['objects']:
-                imageID = cropImage("./recognition/test/test3.png", object)
-                imagePath = f"./recognition/processing/{imageID}.png"
-        
+    # Process cropped objects
+    visionData = []
+    for object in data["objects"]:
+        imageID = cropImage("./recognition/test/test3.png", object)
+        imagePath = f"./recognition/processing/{imageID}.png"
+
+        # API call to Google Cloud Vision
         with open(imagePath, "rb") as image_file:
-                content = image_file.read()
-                visionData = visionAPI(content=content, features=[{'type_': vision.Feature.Type.LABEL_DETECTION }, {'type_': vision.Feature.Type.LOGO_DETECTION }])
-                print("NICE", imageID,  visionData)
+            content = image_file.read()
+            rawFeatures = visionAPI(
+                content=content,
+                features=[
+                    {"type_": vision.Feature.Type.LABEL_DETECTION},
+                    {"type_": vision.Feature.Type.LOGO_DETECTION},
+                ],
+            )
+            visionData.append((imageID, rawFeatures))
 
-        deleteFolder('./recognition/processing')
+    # Feature Regularization for object visionData
+
+    # for object, data in visionData
+    deleteFolder("./recognition/processing")
