@@ -1,4 +1,5 @@
 from PIL import Image
+from colorthief import ColorThief
 import os
 import shutil
 
@@ -6,6 +7,7 @@ import shutil
 output_directory = "./recognition/processing"
 
 
+# Crop Image to Bounding Box
 def cropImage(imagePath, object):
     image = Image.open(imagePath)
     vertices = object["boundingPoly"]["normalizedVertices"]
@@ -24,8 +26,23 @@ def cropImage(imagePath, object):
     return object["name"]
 
 
+# Delete Image Processing Folder
 def deleteFolder(folderPath):
     try:
         shutil.rmtree(folderPath)
     except OSError as e:
         print(f"Error: {e}")
+
+
+# Get Dominant Color
+def getDominantColor(imagePath, quality=5):
+    colorUtil = ColorThief(imagePath)
+    dominantColor = colorUtil.get_color(quality)
+    return dominantColor
+
+
+# Get Color Palette
+def getColorPalette(imagePath, count=2, quality=5):
+    colorUtil = ColorThief(imagePath)
+    palette = colorUtil.get_palette(count, quality)
+    return palette

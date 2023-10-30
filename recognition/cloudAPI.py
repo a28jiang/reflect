@@ -18,13 +18,13 @@ def visionAPI(content: any, features=standardFeatures):
     imageFeatures = {
         "labels": jsonResponse["labelAnnotations"]
         if "labelAnnotations" in jsonResponse
-        else {},
+        else [],
         "objects": jsonResponse["localizedObjectAnnotations"]
         if "localizedObjectAnnotations" in jsonResponse
-        else {},
+        else [],
         "logos": jsonResponse["logoAnnotation"]
         if "logoAnnotation" in jsonResponse
-        else {},
+        else [],
     }
 
     return imageFeatures
