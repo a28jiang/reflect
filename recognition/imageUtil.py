@@ -2,9 +2,21 @@ from PIL import Image
 from colorthief import ColorThief
 import os
 import shutil
+from math import sqrt
+from cloudAPI import visionAPI
+import numpy as np
+from google.cloud import vision
+
 
 # Temporary folder to save cropped images
 output_directory = "./recognition/processing"
+
+# Standard Google Cloud Vision Feature Request
+standardFeatures = [
+    {"type_": vision.Feature.Type.LABEL_DETECTION},
+    {"type_": vision.Feature.Type.OBJECT_LOCALIZATION},
+    {"type_": vision.Feature.Type.LOGO_DETECTION},
+]
 
 
 # Crop Image to Bounding Box
@@ -46,3 +58,22 @@ def getColorPalette(imagePath, count=2, quality=5):
     colorUtil = ColorThief(imagePath)
     palette = colorUtil.get_palette(count, quality)
     return palette
+
+
+def colorDistance(color1, color2):
+    return np.linalg.norm(np.array(color1) - np.array(color2))
+
+
+def paletteDistance(palette1, palette2):
+    total_distance = 0
+    for color1 in palette1:
+        distances = [colorDistance(color1, color2) for color2 in palette2]
+        total_distance += min(distances)
+    return total_distance / len(palette1)
+
+
+def observePicture(path, features=standardFeatures):
+    with open(path, "rb") as image_file:
+        content = image_file.read()
+        data = visionAPI(content=content, features=features)
+        return data

@@ -9,12 +9,11 @@ standardFeatures = [
 ]
 
 
-def visionAPI(content: any, features=standardFeatures):
+def visionAPI(content: any, features):
     image = vision.Image(content=content)
     response = client.annotate_image({"image": image, "features": features})
 
     jsonResponse = convertResponse(response)
-
     imageFeatures = {
         "labels": jsonResponse["labelAnnotations"]
         if "labelAnnotations" in jsonResponse
@@ -22,8 +21,8 @@ def visionAPI(content: any, features=standardFeatures):
         "objects": jsonResponse["localizedObjectAnnotations"]
         if "localizedObjectAnnotations" in jsonResponse
         else [],
-        "logos": jsonResponse["logoAnnotation"]
-        if "logoAnnotation" in jsonResponse
+        "logos": jsonResponse["logoAnnotations"]
+        if "logoAnnotations" in jsonResponse
         else [],
     }
 
