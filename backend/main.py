@@ -23,13 +23,17 @@ app.add_middleware(
 
 @app.post("/upload_image/")
 async def upload_image(image: UploadFile):
-    with open(f"received_{image.filename}", "wb") as file:
-        content = file.read()
-    
-    # TODO: Add Cloud Vision Processing
-    # processImage(content)
-    
-    return JSONResponse(content={"message": "Image received"})
+   # Define the path where you want to save the file
+   file_path = f"C:/Users/moroa/Desktop/temp_images/{image.filename}"
+
+   # Open the file in write-binary mode
+   with open(file_path, "wb") as buffer:
+       # Read the contents of the uploaded file
+       contents = await image.read()
+       # Write the contents to the new file
+       buffer.write(contents)
+
+   return JSONResponse(content={"message": "Image received"})
 
 # Dependency
 def get_db():
