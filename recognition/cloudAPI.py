@@ -1,7 +1,13 @@
 from google.cloud import vision
+from google.oauth2 import service_account
 import json
+import os
 
-client = vision.ImageAnnotatorClient()
+credentials = service_account.Credentials.from_service_account_file(
+    "recognition/service.json"
+)
+
+client = vision.ImageAnnotatorClient(credentials=credentials)
 standardFeatures = [
     {"type_": vision.Feature.Type.LABEL_DETECTION},
     {"type_": vision.Feature.Type.OBJECT_LOCALIZATION},
