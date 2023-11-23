@@ -29,8 +29,29 @@ def get_items(db: Session, skip: int = 0, limit: int = 100):
 
 
 def create_user_item(db: Session, item: schemas.ItemCreate, user_id: int):
-    db_item = models.Item(**item.dict(), owner_id=user_id)
+    db_item = models.Item(**item.model_dump(), owner_id=user_id)
     db.add(db_item)
     db.commit()
     db.refresh(db_item)
     return db_item
+
+
+def create_outfit(db: Session, outfit: schemas.OutfitCreate, user_id: int):
+    db_outfit = models.Outfit(**outfit.model_dump(), owner_id=user_id)
+    db.add(db_outfit)
+    db.commit()
+    db.refresh(db_outfit)
+    return db_outfit
+
+
+def get_outfit(db: Session, outfit_id: int):
+    return db.query(models.Outfit).filter(models.Outfit.id == outfit_id).first()
+
+
+def get_all_outfits(db: Session, user_id: int, limit: int = 100):
+    return (
+        db.query(models.Outfit)
+        .filter(models.Outfit.owner_id == user_id)
+        .limit(limit)
+        .all()
+    )

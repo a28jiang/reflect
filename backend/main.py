@@ -21,19 +21,38 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
+@app.post("/upload_image/")
+async def batch_upload_image(image: UploadFile):
+    # TODO: create feature vectors for all
+    # TODO: write all to DB
+    return
+
+
 @app.post("/upload_image/")
 async def upload_image(image: UploadFile):
-   # Define the path where you want to save the file
-   file_path = f"C:/Users/moroa/Desktop/temp_images/{image.filename}"
+    # TODO: save to local
+    # Define the path where you want to save the file
+    file_path = f"C:/Users/moroa/Desktop/temp_images/{image.filename}"
 
-   # Open the file in write-binary mode
-   with open(file_path, "wb") as buffer:
-       # Read the contents of the uploaded file
-       contents = await image.read()
-       # Write the contents to the new file
-       buffer.write(contents)
+    # Open the file in write-binary mode
+    with open(file_path, "wb") as buffer:
+        # Read the contents of the uploaded file
+        contents = await image.read()
+        # Write the contents to the new file
+        buffer.write(contents)
 
-   return JSONResponse(content={"message": "Image received"})
+    # TODO: generate feature vector
+
+    # TODO: create entryID in DB - cleanup local
+
+    # TODO: compare entry to all other outfits
+    # if weak comparsions/ thresholds - create new outfit
+
+    # TODO: return probabilites
+
+    return JSONResponse(content={"message": "Image received"})
+
 
 # Dependency
 def get_db():
@@ -77,3 +96,24 @@ def create_item_for_user(
 def read_items(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     items = crud.get_items(db, skip=skip, limit=limit)
     return items
+
+
+@app.post("/outfits/", response_model=schemas.Outfit)
+def create_outfit(
+    user_id: int, outfit: schemas.OutfitCreate, db: Session = Depends(get_db)
+):
+    return crud.create_outfit(db=db, outfit=outfit, user_id=user_id)
+
+
+@app.get("/outfits/{outfit_id}", response_model=schemas.Outfit)
+def read_outfit(outfit_id: int, db: Session = Depends(get_db)):
+    db_outfit = crud.get_outfit(db, outfit_id=outfit_id)
+    if db_outfit is None:
+        raise HTTPException(status_code=404, detail="Outfit not found")
+    return db_outfit
+
+
+@app.get("/outfits/", response_model=List[schemas.Outfit])
+def read_all_outfits(user_id: int, limit: int = 10, db: Session = Depends(get_db)):
+    outfits = crud.get_all_outfits(db, user_id=user_id, limit=limit)
+    return outfits
