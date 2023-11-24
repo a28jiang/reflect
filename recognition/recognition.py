@@ -1,5 +1,5 @@
-from cloudAPI import visionAPI
-from imageUtil import (
+from recognition.cloudAPI import visionAPI
+from recognition.imageUtil import (
     cropImage,
     deleteFolder,
     getDominantColor,
@@ -7,13 +7,11 @@ from imageUtil import (
     observePicture,
 )
 from google.cloud import vision
-import json
 import numpy as np
-from data import labels, objects, logos
+from recognition.data import labels, objects, logos
 
 
-# Scaffold for backend flow
-def testNestedImageCropCalls(path):
+def extractPhotoFeatures(path):
     data = observePicture(path, [{"type_": vision.Feature.Type.OBJECT_LOCALIZATION}])
 
     # Process cropped objects
@@ -35,14 +33,15 @@ def testNestedImageCropCalls(path):
         visionData.append([object["name"], object["score"], colors, rawFeatures])
 
     # Feature Vector Construction
+    vectorData = []
     for data in visionData:
         [name, score, color, features] = data
         vectors = constructFeatureVectors(features, name, score, color)
-        # TODO: Add vector to backend
-        print(vectors)
+        vectorData.append(vectors)
 
     # Cleanup image processing foldler
     deleteFolder("./recognition/processing")
+    return vectorData
 
 
 # Utility for constructing Label, Object and Logo feature vectors
@@ -77,7 +76,7 @@ def populateVector(category, keys, keySet):
         value = obj["score"]
         if name in keySet:
             vector[keySet[name]] = value
-    return vector
+    return vector.tolist()
 
 
-testNestedImageCropCalls("./recognition/test/test8.png")
+extractPhotoFeatures("./recognition/test/test8.png")

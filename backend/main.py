@@ -1,12 +1,12 @@
 from typing import List
 
-from fastapi import Depends, FastAPI, HTTPException, File, UploadFile
+from fastapi import Depends, FastAPI, HTTPException, UploadFile
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 
-from database import crud, models, schemas
-from database.database import SessionLocal, engine
+from backend.database import crud, models, schemas
+from backend.database.database import SessionLocal, engine
 
 models.Base.metadata.create_all(bind=engine)
 

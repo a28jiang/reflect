@@ -17,7 +17,7 @@ class Item(ItemBase):
     owner_id: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class UserBase(BaseModel):
@@ -30,13 +30,13 @@ class UserCreate(UserBase):
 
 class OutfitBase(BaseModel):
     name: str
-    description: str
-    features: Dict[str, List[Any]]
-    entries: List[int]
-    thumbnail: bytes
-    last_worn: datetime
-    white_list: bool
-    favourite: bool
+    description: Optional[str] = None
+    features: Dict[str, Any]
+    entries: Optional[List[int]] = []
+    thumbnail: Optional[bytes] = None
+    last_worn: Optional[datetime] = None
+    white_list: Optional[bool] = None
+    favourite: Optional[bool] = None
 
 
 class OutfitCreate(OutfitBase):
@@ -48,7 +48,7 @@ class Outfit(OutfitBase):
     owner_id: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class User(UserBase):
@@ -58,7 +58,7 @@ class User(UserBase):
     outfits: List[Outfit] = []
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class EntryBase(BaseModel):
@@ -75,4 +75,4 @@ class Entry(EntryBase):
     outfit_id: Optional[int] = None
 
     class Config:
-        orm_mode = True
+        from_attributes = True
