@@ -3,7 +3,7 @@ from colorthief import ColorThief
 import os
 import shutil
 from math import sqrt
-from cloudAPI import visionAPI
+from recognition.cloudAPI import visionAPI
 import numpy as np
 from google.cloud import vision
 

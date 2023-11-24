@@ -1,7 +1,6 @@
 from google.cloud import vision
 from google.oauth2 import service_account
 import json
-import os
 
 credentials = service_account.Credentials.from_service_account_file(
     "recognition/service.json"
