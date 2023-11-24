@@ -51,3 +51,15 @@ class Outfit(Base):
 
     owner_id = Column(Integer, ForeignKey("users.id"))
     owner = relationship("User", back_populates="outfits")
+    entries = relationship("Entry", back_populates="outfit")
+
+
+class Entry(Base):
+    __tablename__ = "entries"
+
+    id = Column(Integer, primary_key=True, index=True)
+    features = Column(JSON)
+    date_created = Column(DateTime)
+
+    outfit_id = Column(Integer, ForeignKey("outfits.id"), nullable=True)
+    outfit = relationship("Outfit", back_populates="entries")

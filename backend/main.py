@@ -117,3 +117,8 @@ def read_outfit(outfit_id: int, db: Session = Depends(get_db)):
 def read_all_outfits(user_id: int, limit: int = 10, db: Session = Depends(get_db)):
     outfits = crud.get_all_outfits(db, user_id=user_id, limit=limit)
     return outfits
+
+
+@app.post("/entries/", response_model=schemas.Entry)
+def create_entry(entry: schemas.EntryCreate, db: Session = Depends(get_db)):
+    return crud.create_entry(db=db, entry=entry)

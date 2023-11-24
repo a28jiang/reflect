@@ -1,4 +1,4 @@
-from typing import List, Union, Dict, Any
+from typing import List, Union, Dict, Any, Optional
 from datetime import datetime
 from pydantic import BaseModel
 
@@ -56,6 +56,23 @@ class User(UserBase):
     is_active: bool
     items: List[Item] = []
     outfits: List[Outfit] = []
+
+    class Config:
+        orm_mode = True
+
+
+class EntryBase(BaseModel):
+    features: Dict[str, List[Any]]
+    date_created: datetime
+
+
+class EntryCreate(EntryBase):
+    outfit_id: Optional[int] = None
+
+
+class Entry(EntryBase):
+    id: int
+    outfit_id: Optional[int] = None
 
     class Config:
         orm_mode = True

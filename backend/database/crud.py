@@ -1,3 +1,4 @@
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from . import models, schemas
@@ -55,3 +56,38 @@ def get_all_outfits(db: Session, user_id: int, limit: int = 100):
         .limit(limit)
         .all()
     )
+
+
+def create_entry(db: Session, entry: schemas.EntryCreate):
+    db_entry = models.Entry(**entry.model_dump())
+    db.add(db_entry)
+    db.commit()
+    db.refresh(db_entry)
+    return db_entry
+
+
+def get_entry(db: Session, entry_id: int):
+    return db.query(models.Entry).filter(models.Entry.id == entry_id).first()
+
+
+def update_entry_outfit_id(db: Session, entry_id: int, outfit_id: int):
+    # Check if the entry exists
+    db_entry = get_entry(db, entry_id)
+    if db_entry is None:
+        return None  # Entry not found
+
+    # Check if the specified outfit_id exists
+    db_outfit = get_outfit(db, outfit_id)
+    if db_outfit is None:
+        return None  # Outfit not found
+
+    try:
+        # Update the outfit_id for the entry
+        db_entry.outfit_id = outfit_id
+        db.commit()
+        db.refresh(db_entry)
+        return db_entry
+    except IntegrityError:
+        # IntegrityError may occur if the new outfit_id violates constraints
+        db.rollback()
+        return None
