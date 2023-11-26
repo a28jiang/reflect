@@ -15,9 +15,9 @@ def compareFeatures(obj1, obj2):
     logocos = cosineSimilarity(obj1["logo"], obj2["logo"])
     # logodist = distance(obj1["logo"], obj2["logo"])
 
-    paletteDist = paletteDistance(obj1["color"]["palette"], obj2["color"]["palette"])
-    domColorDist = colorDistance(obj1["color"]["dominant"], obj2["color"]["dominant"])
-    colorFactor = ((1 - paletteDist) + (1 - domColorDist)) / (2 * NORM_COLOUR)
+    paletteDist = paletteDistance(obj1["color"]["palette"], obj2["color"]["palette"]) / NORM_COLOUR
+    domColorDist = colorDistance(obj1["color"]["dominant"], obj2["color"]["dominant"]) / NORM_COLOUR
+    colorFactor = ((1 - paletteDist) + (1 - domColorDist)) / 2
 
     if sum(obj1["logo"]) == 0 or sum(obj2["logo"]) == 0:
         finalValue = labelcos * 0.33 + objectcos * 0.33 + colorFactor * 0.33
