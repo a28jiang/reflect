@@ -15,10 +15,10 @@ def extractPhotoFeatures(path):
     data = observePicture(path, [{"type_": vision.Feature.Type.OBJECT_LOCALIZATION}])
 
     # Process cropped objects
-    visionData = []
+    visionData, visionDataSet = [], set()
     for object in data["objects"]:
-        # Exit if irrelevant object
-        if object["name"] not in objects.objectSet:
+        # Exit if irrelevant object or already processed (i.e two shoes)
+        if object["name"] not in objects.objectSet or object["name"] in visionDataSet:
             continue
 
         imageID = cropImage(path, object)
@@ -31,6 +31,7 @@ def extractPhotoFeatures(path):
         # API call to Google Cloud Vision
         rawFeatures = observePicture(subPath)
         visionData.append([object["name"], object["score"], colors, rawFeatures])
+        visionDataSet.add(object["name"])
 
     # Feature Vector Construction
     vectorData = []
