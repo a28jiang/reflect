@@ -1,12 +1,19 @@
-from typing import List
+from datetime import datetime
+import copy
+from typing import List, Optional
 
-from fastapi import Depends, FastAPI, HTTPException, UploadFile
+from fastapi import Depends, FastAPI, HTTPException, UploadFile, Form
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
+import numpy as np
 from sqlalchemy.orm import Session
 
 from backend.database import crud, models, schemas
 from backend.database.database import SessionLocal, engine
+
+# Import the necessary external modules
+from recognition.recognition import extractPhotoFeatures
+from recognition.compare import compareFeatures
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -22,38 +29,6 @@ app.add_middleware(
 )
 
 
-@app.post("/upload_image/")
-async def batch_upload_image(image: UploadFile):
-    # TODO: create feature vectors for all
-    # TODO: write all to DB
-    return
-
-
-@app.post("/upload_image/")
-async def upload_image(image: UploadFile):
-    # TODO: save to local
-    # Define the path where you want to save the file
-    file_path = f"C:/Users/moroa/Desktop/temp_images/{image.filename}"
-
-    # Open the file in write-binary mode
-    with open(file_path, "wb") as buffer:
-        # Read the contents of the uploaded file
-        contents = await image.read()
-        # Write the contents to the new file
-        buffer.write(contents)
-
-    # TODO: generate feature vector
-
-    # TODO: create entryID in DB - cleanup local
-
-    # TODO: compare entry to all other outfits
-    # if weak comparsions/ thresholds - create new outfit
-
-    # TODO: return probabilites
-
-    return JSONResponse(content={"message": "Image received"})
-
-
 # Dependency
 def get_db():
     db = SessionLocal()
@@ -61,6 +36,11 @@ def get_db():
         yield db
     finally:
         db.close()
+
+
+@app.get("/")
+def status_check():
+    return "server running"
 
 
 @app.post("/users/", response_model=schemas.User)
@@ -92,6 +72,35 @@ def create_outfit(
     return crud.create_outfit(db=db, outfit=outfit, user_id=user_id)
 
 
+@app.put("/outfits/{outfit_id}", response_model=schemas.Outfit)
+def update_outfit(
+    outfit_id: int, outfit: schemas.OutfitUpdate, db: Session = Depends(get_db)
+):
+    db_outfit = crud.get_outfit(db, outfit_id)
+    if db_outfit is None:
+        raise HTTPException(status_code=404, detail="Outfit not found")
+
+    # Update outfit properties
+    for field, value in outfit.dict(exclude_unset=True).items():
+        setattr(db_outfit, field, value)
+
+    db.commit()
+    db.refresh(db_outfit)
+    return db_outfit
+
+
+@app.delete("/outfits/{outfit_id}", response_model=schemas.Outfit)
+def delete_outfit(outfit_id: int, db: Session = Depends(get_db)):
+    db_outfit = crud.get_outfit(db, outfit_id)
+    if db_outfit is None:
+        raise HTTPException(status_code=404, detail="Outfit not found")
+
+    db.delete(db_outfit)
+    db.commit()
+
+    return db_outfit
+
+
 @app.get("/outfits/{outfit_id}", response_model=schemas.Outfit)
 def read_outfit(outfit_id: int, db: Session = Depends(get_db)):
     db_outfit = crud.get_outfit(db, outfit_id=outfit_id)
@@ -109,3 +118,131 @@ def read_all_outfits(user_id: int, limit: int = 10, db: Session = Depends(get_db
 @app.post("/entries/", response_model=schemas.Entry)
 def create_entry(entry: schemas.EntryCreate, db: Session = Depends(get_db)):
     return crud.create_entry(db=db, entry=entry)
+
+
+@app.get("/entries/{entry_id}", response_model=schemas.Entry)
+def read_entry(entry_id: int, db: Session = Depends(get_db)):
+    db_entry = crud.get_entry(db, entry_id=entry_id)
+    if db_entry is None:
+        raise HTTPException(status_code=404, detail="Entry not found")
+    return db_entry
+
+
+@app.post("/upload/")
+def upload(user_id: int, image: str = Form(...), db: Session = Depends(get_db)):
+
+    # Step 1: Extract features from the image
+    features = extractPhotoFeatures(image)
+
+    # Step 2: Create an entry using the feature vector
+    clothing_object = []
+    for feature in features:
+        entry_create = schemas.EntryCreate(
+            features=feature, date_created=datetime.now()
+        )
+        entry = crud.create_entry(db=db, entry=entry_create)
+
+        # Step 3: Get all outfits and compare the extracted feature vector
+        all_outfits = crud.get_all_outfits(db, user_id)
+        comparison_scores = []
+        for outfit in all_outfits:
+            score = compareFeatures(feature, outfit.features)
+            comparison_scores.append({"outfit": outfit, "score": score})
+
+        # Step 4: Return the top 5 matches
+        matches = sorted(comparison_scores, key=lambda x: x["score"], reverse=True)[:6]
+        clothing_object.append(
+            {
+                "matches": matches,
+                "id": entry.id,
+                "name": feature["name"],
+                "features": feature,
+            }
+        )
+    return clothing_object
+
+
+@app.post("/match/")
+def match(
+    user_id: int,
+    entry_id: int = Form(...),
+    outfit_id: int = Form(None),
+    name: str = Form(None),
+    description: str = Form(None),
+    db: Session = Depends(get_db),
+):
+
+    entry = crud.get_entry(db, entry_id=entry_id)
+    if entry is None:
+        raise HTTPException(status_code=404, detail="Entry not found")
+
+    # Step 1: If no outfit_id is provided, create a new outfit object
+    if outfit_id is None:
+        outfit = schemas.OutfitCreate(
+            name=name,
+            description=description,
+            features={},
+            entries=[],
+        )
+        outfit = crud.create_outfit(db, outfit, user_id)
+        outfit.features = entry.features
+        outfit.entries = [entry]
+        outfit.thumbnail = entry.features["image"]
+
+        db.commit()
+
+        return {
+            "message": f"Successfully created new outfit ${outfit.id}",
+            "id": outfit.id,
+        }
+    else:
+        # Step 2: If outfit_id is provided, update the existing outfit object
+        outfit = crud.get_outfit(db, outfit_id=outfit_id)
+        if outfit is None:
+            raise HTTPException(status_code=404, detail="Outfit not found")
+
+        # Step 2a: Add entry to outfit's list of entries
+        outfit.entries.append(entry)
+
+        print(len(outfit.entries), outfit.id, entry.id)
+        # Step 2b: Update outfit's feature vector property
+        updated_features = calculate_weighted_average(
+            outfit.features, entry.features, 1 / (len(outfit.entries))
+        )
+        outfit.features = updated_features
+        outfit.last_worn = datetime.now()
+
+        db.commit()
+
+        return {
+            "message": f"Successfully matched to existing ${entry_id}",
+            "id": outfit_id,
+        }
+
+
+def calculate_weighted_average(v1, v2, weight):
+
+    print("weight", weight)
+    newFeatures = copy.deepcopy(v1)
+
+    newFeatures["label"] = (
+        np.array(v1["label"]) * (1 - weight) + np.array(v2["label"]) * weight
+    ).tolist()
+    newFeatures["object"] = (
+        np.array(v1["object"]) * (1 - weight) + np.array(v2["object"]) * weight
+    ).tolist()
+    newFeatures["logo"] = (
+        np.array(v1["logo"]) * (1 - weight) + np.array(v2["logo"]) * weight
+    ).tolist()
+    newFeatures["color"] = {
+        "dominant": (
+            np.array(v1["color"]["dominant"]) * (1 - weight)
+            + np.array(v2["color"]["dominant"]) * weight
+        ).tolist(),
+        "palette": (
+            np.array(v1["color"]["palette"]) * (1 - weight)
+            + np.array(v2["color"]["palette"]) * weight
+        ).tolist(),
+    }
+
+    return newFeatures

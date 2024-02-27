@@ -17,6 +17,8 @@ class User(Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
+    first_name = Column(String)
+    last_name = Column(String)
     email = Column(String, unique=True, index=True)
     hashed_password = Column(String)
     is_active = Column(Boolean, default=True)
@@ -44,7 +46,7 @@ class Outfit(Base):
     description = Column(String)
     features = Column(JSON)
     entries = Column(JSON)
-    thumbnail = Column(LargeBinary)
+    thumbnail = Column(String)
     last_worn = Column(DateTime)
     white_list = Column(Boolean, default=False)
     favourite = Column(Boolean, default=False)
