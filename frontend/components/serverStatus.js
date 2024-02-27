@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { View, Text } from "react-native";
 import { APP_URL } from "../constants";
 
-export const ServerStatusBanner = () => {
+export const ServerStatusBanner = ({ refreshing }) => {
   const [serverStatus, setServerStatus] = useState(null);
 
   useEffect(() => {
@@ -18,13 +18,13 @@ export const ServerStatusBanner = () => {
         }
       } catch (error) {
         setServerStatus("Error checking server status.");
+        setServerStatus(false);
       }
     };
 
     // Check server status when the component mounts
     checkServerStatus();
-  }, []); // Empty dependency array means this effect runs once when the component mounts
-
+  }, [refreshing]); // Empty dependency array means this effect runs once when the component mounts
   return (
     <View>
       {!serverStatus && (

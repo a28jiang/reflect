@@ -28,22 +28,24 @@ const colors = {
 export const ClosetData = ({ outfits }) => {
   holeSize = Dimensions.get("window").width - 250;
 
-  const data = outfits.reduce((acc, item) => {
-    const typeName = item.features.type;
+  const data = outfits.length
+    ? outfits.reduce((acc, item) => {
+        const typeName = item.features.type;
 
-    // Check if the type already exists in the accumulator
-    const existingType = acc.find((entry) => entry.name === typeName);
+        // Check if the type already exists in the accumulator
+        const existingType = acc.find((entry) => entry.name === typeName);
 
-    if (existingType) {
-      // If the type already exists, increment its value
-      existingType.value += 1;
-    } else {
-      // If the type doesn't exist, add a new entry
-      acc.push({ name: typeName, value: 1, color: colors[typeName] });
-    }
+        if (existingType) {
+          // If the type already exists, increment its value
+          existingType.value += 1;
+        } else {
+          // If the type doesn't exist, add a new entry
+          acc.push({ name: typeName, value: 1, color: colors[typeName] });
+        }
 
-    return acc;
-  }, []);
+        return acc;
+      }, [])
+    : [];
 
   return (
     <View>

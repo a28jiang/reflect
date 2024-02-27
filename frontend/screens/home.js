@@ -3,6 +3,7 @@ import {
   ScrollView,
   Text,
   StyleSheet,
+  RefreshControl,
   TouchableOpacity,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
@@ -53,23 +54,30 @@ const tallyItemsByTimeFrame = (items) => {
 };
 
 // Define Home screen component
-export const HomeScreen = ({ outfits, user }) => {
+export const HomeScreen = ({ outfits, user, refreshing, fetchOutfits }) => {
   const navigation = useNavigation();
   tally = tallyItemsByTimeFrame(outfits);
+
+  const outfit_length = outfits.length ? outfits.length : 0;
 
   return (
     <LinearGradient
       colors={["white", "#F6FAE5"]}
       style={{ flex: 1, padding: 32, paddingBottom: 0 }}
     >
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={fetchOutfits} />
+        }
+      >
         <Text
           style={{ ...commonStyles.subtitleText, fontSize: 28, padding: 16 }}
         >
           Welcome {user && user.first_name} 👋
         </Text>
         <Card
-          title={`${outfits.length} items in your closet`}
+          title={`${outfit_length} items in your closet`}
           buttonText="See Closet"
           onPress={() => navigation.navigate("Closet")}
           content={<ClosetData outfits={outfits} />}
@@ -155,7 +163,7 @@ export const HomeScreen = ({ outfits, user }) => {
               }}
             >
               <Text style={commonStyles.subtitleText}>
-                {outfits.length - tally.oneYear}{" "}
+                {outfit_length - tally.oneYear}{" "}
               </Text>
               <Text
                 style={{

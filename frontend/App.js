@@ -32,10 +32,10 @@ export const App = () => {
         `${APP_URL}/outfits/?user_id=${USER_ID}&limit=100`
       );
       const data = await response.json();
-      print(data);
       setOutfits(data);
     } catch (error) {
       console.error("Error fetching outfits:", error);
+      setOutfits([]);
     }
     setRefreshing(false);
   };
@@ -57,7 +57,7 @@ export const App = () => {
 
   return (
     <RootSiblingParent>
-      <ServerStatusBanner />
+      <ServerStatusBanner refreshing={refreshing} />
       <NavigationContainer>
         <Tab.Navigator
           screenOptions={({ route }) => ({
@@ -122,7 +122,14 @@ export const App = () => {
           {/* Define the screens for each tab */}
           <Tab.Screen
             name="Home"
-            children={() => <HomeScreen outfits={outfits} user={user} />}
+            children={() => (
+              <HomeScreen
+                refreshing={refreshing}
+                fetchOutfits={fetchOutfits}
+                outfits={outfits}
+                user={user}
+              />
+            )}
           />
           <Tab.Screen name="Friends" component={FriendsScreen} />
           <Tab.Screen

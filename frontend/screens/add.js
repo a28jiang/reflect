@@ -121,7 +121,6 @@ export const AddScreen = ({ fetchOutfits }) => {
     })
       .then((response) => response.json())
       .then((data) => {
-        console.log("success", data);
         const newResponse = response.filter((obj) => obj.id !== item.id);
 
         if (match) {

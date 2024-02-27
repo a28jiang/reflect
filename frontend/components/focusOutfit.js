@@ -34,7 +34,6 @@ export const FocusOutfit = ({ outfit, resetCloset }) => {
     })
       .then((response) => response.json())
       .then((data) => {
-        console.log(data);
         Toast.show(`✅ Outfit successfully updated`, {
           position: Toast.positions.CENTER,
           backgroundColor: "#314F57",
