@@ -32,7 +32,12 @@ export const App = () => {
         `${APP_URL}/outfits/?user_id=${USER_ID}&limit=100`
       );
       const data = await response.json();
-      setOutfits(data);
+
+      if (data.length) {
+        setOutfits(data);
+      } else {
+        setOutfits([]);
+      }
     } catch (error) {
       console.error("Error fetching outfits:", error);
       setOutfits([]);
