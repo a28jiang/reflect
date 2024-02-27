@@ -22,24 +22,47 @@ class Item(ItemBase):
 
 class UserBase(BaseModel):
     email: str
+    first_name: str
+    last_name: str
 
 
 class UserCreate(UserBase):
     password: str
 
 
+class EntryBase(BaseModel):
+    features: Dict[str, Any]
+    date_created: datetime = datetime.now()
+
+
+class EntryCreate(EntryBase):
+    outfit_id: Optional[int] = None
+
+
+class Entry(EntryBase):
+    id: int
+    outfit_id: Optional[int] = None
+
+    class Config:
+        from_attributes = True
+
+
 class OutfitBase(BaseModel):
     name: str
     description: Optional[str] = None
-    features: Dict[str, Any]
-    entries: Optional[List[int]] = []
-    thumbnail: Optional[bytes] = None
-    last_worn: Optional[datetime] = None
+    features: Dict[str, Any] = {}
+    entries: Optional[List[Entry]] = []
+    thumbnail: Optional[str] = None
+    last_worn: Optional[datetime] = datetime.now()
     white_list: Optional[bool] = None
     favourite: Optional[bool] = None
 
 
 class OutfitCreate(OutfitBase):
+    pass
+
+
+class OutfitUpdate(OutfitBase):
     pass
 
 
@@ -56,23 +79,6 @@ class User(UserBase):
     is_active: bool
     items: List[Item] = []
     outfits: List[Outfit] = []
-
-    class Config:
-        from_attributes = True
-
-
-class EntryBase(BaseModel):
-    features: Dict[str, List[Any]]
-    date_created: datetime
-
-
-class EntryCreate(EntryBase):
-    outfit_id: Optional[int] = None
-
-
-class Entry(EntryBase):
-    id: int
-    outfit_id: Optional[int] = None
 
     class Config:
         from_attributes = True

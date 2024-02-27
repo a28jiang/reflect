@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "frontend",
-    "slug": "frontend",
+    "slug": "reflect",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -15,16 +15,34 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSCameraUsageDescription": "Your message about camera usage",
+        "NSPhotoLibraryUsageDescription": "Your message about photo library usage"
+      },
+      "bundleIdentifier": "com.a28jiang.reflect"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.a28jiang.reflect"
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "459146a8-5a0a-4d40-81ea-02cdd9a16ef5"
+      }
+    },
+    "owner": "a28jiang",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/459146a8-5a0a-4d40-81ea-02cdd9a16ef5"
     }
   }
 }
