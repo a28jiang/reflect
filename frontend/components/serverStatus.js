@@ -10,7 +10,6 @@ export const ServerStatusBanner = ({ refreshing }) => {
       try {
         const response = await fetch(APP_URL);
         const data = await response.json();
-        console.log(data);
         if (data.includes("server running")) {
           setServerStatus(true);
         } else {
