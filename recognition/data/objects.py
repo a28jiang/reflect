@@ -7,7 +7,7 @@ objectData = [
     "Jacket",
     "Shirt",
     "Outerwear",
-    "Luggage & Bags",
+    "Skirt",
 ]
 
 objectSet = {label: index for index, label in enumerate(objectData)}

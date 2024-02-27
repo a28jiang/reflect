@@ -1,3 +1,5 @@
+import base64
+from io import BytesIO
 from PIL import Image
 from colorthief import ColorThief
 import os
@@ -20,8 +22,10 @@ standardFeatures = [
 
 
 # Crop Image to Bounding Box
-def cropImage(imagePath, object):
-    image = Image.open(imagePath)
+def cropImage(imageData, object):
+
+    binaryData = base64.b64decode(imageData)
+    image = Image.open(BytesIO(binaryData))
     vertices = object["boundingPoly"]["normalizedVertices"]
     width, height = image.size
     vertices = [
@@ -35,7 +39,12 @@ def cropImage(imagePath, object):
         os.makedirs(output_directory)
 
     crop.save(f"{output_directory}/{object['name']}.png")
-    return object["name"]
+
+    buffered = BytesIO()
+    crop.save(buffered, format="JPEG")
+    crop_str = base64.b64encode(buffered.getvalue()).decode("utf-8")
+
+    return object["name"], crop_str
 
 
 # Delete Image Processing Folder
@@ -72,8 +81,18 @@ def paletteDistance(palette1, palette2):
     return total_distance / len(palette1)
 
 
-def observePicture(path, features=standardFeatures):
+def processPicturePath(path, features=standardFeatures):
     with open(path, "rb") as image_file:
         content = image_file.read()
         data = visionAPI(content=content, features=features)
         return data
+
+
+def processPictureData(image, features=standardFeatures):
+    features = visionAPI(content=image, features=features)
+    return features
+
+
+def trimImagePath(image):
+    _, data = image.split(",", 1)
+    return data

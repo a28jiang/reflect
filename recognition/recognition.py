@@ -1,43 +1,59 @@
-from recognition.cloudAPI import visionAPI
 from recognition.imageUtil import (
     cropImage,
     deleteFolder,
     getDominantColor,
     getColorPalette,
-    observePicture,
+    processPictureData,
+    trimImagePath,
+    processPicturePath,
 )
 from google.cloud import vision
 import numpy as np
 from recognition.data import labels, objects, logos
+import recognition.colornames
 
 
-def extractPhotoFeatures(path):
-    data = observePicture(path, [{"type_": vision.Feature.Type.OBJECT_LOCALIZATION}])
+def extractPhotoFeatures(imageData):
+
+    data = processPictureData(
+        imageData, [{"type_": vision.Feature.Type.OBJECT_LOCALIZATION}]
+    )
 
     # Process cropped objects
     visionData, visionDataSet = [], set()
     for object in data["objects"]:
         # Exit if irrelevant object or already processed (i.e two shoes)
-        if object["name"] not in objects.objectSet or object["name"] in visionDataSet:
+        if (
+            object["name"] not in objects.objectSet
+            or object["name"] in visionDataSet
+            or object["name"] == "Shoe"
+        ):
             continue
 
-        imageID = cropImage(path, object)
+        imageID, croppedImage = cropImage(imageData, object)
         subPath = f"./recognition/processing/{imageID}.png"
-        colors = {
+        color = {
             "dominant": getDominantColor(subPath),
             "palette": getColorPalette(subPath),
         }
 
         # API call to Google Cloud Vision
-        rawFeatures = observePicture(subPath)
-        visionData.append([object["name"], object["score"], colors, rawFeatures])
+        rawFeatures = processPicturePath(subPath)
+        visionData.append(
+            [object["name"], object["score"], color, rawFeatures, croppedImage]
+        )
         visionDataSet.add(object["name"])
 
     # Feature Vector Construction
     vectorData = []
     for data in visionData:
-        [name, score, color, features] = data
-        vectors = constructFeatureVectors(features, name, score, color)
+        [name, score, color, features, croppedImage] = data
+        vectors = constructFeatureVectors(
+            features, name, score, color, croppedImage, name
+        )
+        vectors["name"] = (
+            recognition.colornames.find(color["dominant"]) + " " + vectors["name"]
+        )
         vectorData.append(vectors)
 
     # Cleanup image processing foldler
@@ -46,7 +62,7 @@ def extractPhotoFeatures(path):
 
 
 # Utility for constructing Label, Object and Logo feature vectors
-def constructFeatureVectors(features, name, score, color):
+def constructFeatureVectors(features, name, score, color, image, clothingType):
     # Label Vector
     labelV = populateVector(features["labels"], labels.labelData, labels.labelSet)
 
@@ -59,10 +75,12 @@ def constructFeatureVectors(features, name, score, color):
 
     return {
         "name": name,
+        "image": image,
         "label": labelV,
         "object": objectV,
         "logo": logoV,
         "color": color,
+        "type": clothingType,
     }
 
 
@@ -78,6 +96,3 @@ def populateVector(category, keys, keySet):
         if name in keySet:
             vector[keySet[name]] = value
     return vector.tolist()
-
-
-extractPhotoFeatures("./recognition/test/test8.png")

@@ -6,24 +6,34 @@ NORM_COLOUR = np.sqrt(3 * 255**2)
 
 # TODO: test if CRITERION: cosinesimilarity vs distance makes a difference
 def compareFeatures(obj1, obj2):
+
+    if not obj1 or not obj2:
+        return 0
+
     labelcos = cosineSimilarity(obj1["label"], obj2["label"])
     # labeldist = distance(obj1["label"], obj2["label"])
 
     objectcos = cosineSimilarity(obj1["object"], obj2["object"])
-    # objectdist = distance(obj1["object"], obj2["object"])
+    # objectcos = distance(obj1["object"], obj2["object"])
 
     logocos = cosineSimilarity(obj1["logo"], obj2["logo"])
     # logodist = distance(obj1["logo"], obj2["logo"])
 
-    paletteDist = paletteDistance(obj1["color"]["palette"], obj2["color"]["palette"]) / NORM_COLOUR
-    domColorDist = colorDistance(obj1["color"]["dominant"], obj2["color"]["dominant"]) / NORM_COLOUR
-    colorFactor = ((1 - paletteDist) + (1 - domColorDist)) / 2
+    paletteDist = (
+        paletteDistance(obj1["color"]["palette"], obj2["color"]["palette"])
+        / NORM_COLOUR
+    )
+    domColorDist = (
+        colorDistance(obj1["color"]["dominant"], obj2["color"]["dominant"])
+        / NORM_COLOUR
+    )
+    colorFactor = 0.5 * (1 - paletteDist) + 0.5 * (1 - domColorDist)
 
     if sum(obj1["logo"]) == 0 or sum(obj2["logo"]) == 0:
-        finalValue = labelcos * 0.33 + objectcos * 0.33 + colorFactor * 0.33
+        finalValue = labelcos * 0.125 + objectcos * 0.125 + colorFactor * 0.75
     else:
         finalValue = (
-            labelcos * 0.3 + objectcos * 0.25 + colorFactor * 0.25 + logocos * 0.2
+            labelcos * 0.4 + objectcos * 0.2 + colorFactor * 0.2 + logocos * 0.2
         )
     return finalValue
 
@@ -40,4 +50,5 @@ def cosineSimilarity(v1, v2):
 
 def distance(v1, v2):
     v1, v2 = np.array(v1), np.array(v2)  # remove
-    return np.linalg.norm(v1 - v2)
+    dist = np.linalg.norm(v1 - v2)
+    return 1 / (1 + dist)
