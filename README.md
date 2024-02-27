@@ -1,21 +1,42 @@
-# Python Environment
+# Reflect 🪞
 
-Install Dependencies: `pip3 install -r requirements.txt`
+- [Backend](#backend)
+- [Frontend](#frontend)
+- [Recognition](#recognition)
 
-Save Dependencies: `reflect/bin/pip3 freeze > requirements.txt`
+This project leverages clothing recognition to help users digitize their wardrobe and develop sustainable consumer habits.
 
-# Backend
+![Infographic](info.png)
 
-## To run App
+## Backend
 
-Hot reload: `uvicorn main:app --reload`
+Switch to Python environment run: `source reflect/bin/activate`
 
-# Frontend
+Start Backend by running: `uvicorn main:app --reload`
 
-`expo start`
+Localtunnel is used to expose the server port (8000).
+Follow these instructions to [quickstart localtunnel](https://theboroer.github.io/localtunnel-www/).
+To start the server https://reflect.loca.lt run the command: `lt -p 8000 -s reflect`
 
-# Clothing Recognition
+Browse API docs at: https://reflect.loca.lt/docs
 
-Setup Google Cloud Auth: https://googleapis.dev/python/google-api-core/latest/auth.html
+## Frontend
 
-Instructions: https://cloud.google.com/python/docs/reference/vision/latest
+Ensure that backend is running, and the port is exposed in the above steps.
+
+Run `npm start` to start a local development server.
+
+[Expo Go](https://expo.dev/client) can be downloaded to emulate the application on your phone.
+
+## Recognition
+
+Request the latest `service.json` and place in `./recognition` to enable Google Cloud APIs
+
+````
+{
+  "type": "service_account",
+  "project_id": "reflect-415121",
+  ...
+}```
+
+````
