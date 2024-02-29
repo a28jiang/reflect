@@ -72,6 +72,15 @@ export const FocusOutfit = ({ outfit, resetCloset }) => {
 
   return (
     <View style={{ justifyContent: "center", alignItems: "center" }}>
+      <View
+        style={{
+          position: "absolute",
+          top: 155,
+          right: (Dimensions.get("window").width - 175) / 2 - 55,
+        }}
+      >
+        <Feather name="edit" size={16} color="#314F57" />
+      </View>
       <Image
         source={{
           uri: `data:image/png;base64,${outfit.thumbnail}`,
@@ -83,16 +92,6 @@ export const FocusOutfit = ({ outfit, resetCloset }) => {
           marginBottom: 12,
         }}
         resizeMode="cover" // This ensures the image takes up the entire space in the card
-      />
-      <Feather
-        style={{
-          position: "absolute",
-          top: Dimensions.get("window").height / 6,
-          right: 75,
-        }}
-        name="edit"
-        size={16}
-        color="#314F57"
       />
       <TextInput
         value={name}
@@ -111,7 +110,6 @@ export const FocusOutfit = ({ outfit, resetCloset }) => {
           fontWeight: 400,
         }}
       />
-
       <Text
         style={{
           ...commonStyles.subtitle2Text,

@@ -1,7 +1,9 @@
-import { Dimensions, View, Text } from "react-native";
+import { Dimensions, View, Text, Image, TouchableOpacity } from "react-native";
 import { PieChart } from "react-native-chart-kit";
 import Svg, { Circle } from "react-native-svg";
 import commonStyles from "../styles";
+import { Feather } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
 
 const chartConfig = {
   backgroundColor: "#000000",
@@ -27,6 +29,7 @@ const colors = {
 
 export const ClosetData = ({ outfits }) => {
   holeSize = Dimensions.get("window").width - 250;
+  const navigation = useNavigation();
 
   const data = outfits.length
     ? outfits.reduce((acc, item) => {
@@ -47,7 +50,7 @@ export const ClosetData = ({ outfits }) => {
       }, [])
     : [];
 
-  return (
+  return outfits.length > 0 ? (
     <View>
       <View style={{ zIndex: 1 }}>
         <PieChart
@@ -64,7 +67,14 @@ export const ClosetData = ({ outfits }) => {
           hasLegend={false}
         />
       </View>
-      <View style={{ position: "absolute", top: 50, right: 0 }}>
+
+      <View
+        style={{
+          position: "absolute",
+          top: 50,
+          left: Dimensions.get("window").width / 2 + 15,
+        }}
+      >
         {data &&
           data.map((item) => (
             <View
@@ -81,7 +91,7 @@ export const ClosetData = ({ outfits }) => {
                   fontSize: 12,
                 }}
               >
-                ({item.value}) {item.name}
+                {`(${item.value}) ${item.name}`.slice(0, 13)}
               </Text>
             </View>
           ))}
@@ -91,10 +101,37 @@ export const ClosetData = ({ outfits }) => {
         style={{
           zIndex: 9999,
           position: "absolute",
+          left: Dimensions.get("window").width / 3 - 88,
+          top: 65,
         }}
       >
-        <Circle cx="34%" cy="54%" r="24%" fill="white" />
+        <Circle r="55" cx="55" cy="55" fill="white" />
       </Svg>
+    </View>
+  ) : (
+    <View
+      style={{
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        padding: 20,
+      }}
+    >
+      <Image
+        source={require("../assets/mascot5.png")}
+        style={{ width: 125, height: 125 }}
+      />
+      <TouchableOpacity
+        onPress={() => navigation.navigate("Add")}
+        style={{
+          ...commonStyles.solidButton,
+          marginTop: 16,
+          width: "90%",
+        }}
+      >
+        <Feather name="plus" size={16} color="white" />
+        <Text style={commonStyles.solidButtonText}>Add Item</Text>
+      </TouchableOpacity>
     </View>
   );
 };

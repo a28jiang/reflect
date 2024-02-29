@@ -57,13 +57,12 @@ const tallyItemsByTimeFrame = (items) => {
 export const HomeScreen = ({ outfits, user, refreshing, fetchOutfits }) => {
   const navigation = useNavigation();
   tally = tallyItemsByTimeFrame(outfits);
-
   const outfit_length = outfits.length ? outfits.length : 0;
 
   return (
     <LinearGradient
       colors={["white", "#F6FAE5"]}
-      style={{ flex: 1, padding: 32, paddingBottom: 0 }}
+      style={{ flex: 1, padding: 20, paddingBottom: 0 }}
     >
       <ScrollView
         showsVerticalScrollIndicator={false}
@@ -85,7 +84,7 @@ export const HomeScreen = ({ outfits, user, refreshing, fetchOutfits }) => {
         <Card
           title="Your closet usage"
           buttonText="See Trends"
-          button={() => {}}
+          onPress={() => navigation.navigate("Friends")}
           content={
             <View>
               <UsageData tally={tally} outfits={outfits} />
@@ -95,7 +94,7 @@ export const HomeScreen = ({ outfits, user, refreshing, fetchOutfits }) => {
         <Card
           title="Where you stand"
           buttonText="See Leaderboard"
-          button={() => {}}
+          onPress={() => navigation.navigate("Friends")}
           content={
             <View>
               <View
@@ -126,7 +125,7 @@ export const HomeScreen = ({ outfits, user, refreshing, fetchOutfits }) => {
         <Card
           title="Worn only once"
           buttonText="See Items"
-          button={() => {}}
+          onPress={() => navigation.navigate("Closet")}
           content={
             <View
               style={{
@@ -152,7 +151,7 @@ export const HomeScreen = ({ outfits, user, refreshing, fetchOutfits }) => {
         <Card
           title="Unworn in the past year"
           buttonText="See Items"
-          button={() => {}}
+          onPress={() => navigation.navigate("Closet")}
           content={
             <View
               style={{
@@ -204,6 +203,7 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     borderRadius: 8,
     margin: 10,
+    marginX: 0,
     padding: 15,
     shadowColor: "rgba(0,0,0, 0.5)",
     shadowOffset: {

@@ -46,7 +46,7 @@ export const commonStyles = {
   solidButton: {
     backgroundColor: "#314F57",
     borderRadius: 6,
-    padding: 20,
+    padding: 16,
     alignItems: "center",
     marginTop: 20,
     width: "100%",

@@ -17,11 +17,13 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import commonStyles from "../styles";
 import { FocusOutfit } from "../components/focusOutfit";
+import { useNavigation } from "@react-navigation/native";
 
 export const ClosetScreen = ({ refreshing, fetchOutfits, outfits }) => {
   const [selectedFilter, setSelectedFilter] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
 
+  const navigation = useNavigation();
   const filteredOutfits = outfits.filter((item) => {
     if (selectedFilter === "All") {
       return item.name.toLowerCase().includes(searchQuery.toLowerCase());
@@ -105,6 +107,42 @@ export const ClosetScreen = ({ refreshing, fetchOutfits, outfits }) => {
               outfit={filteredOutfits[0]}
             />
           </ScrollView>
+        ) : filteredOutfits.length == 0 ? (
+          <View
+            style={{
+              flex: 1,
+              justifyContent: "center",
+              alignItems: "center",
+              padding: 20,
+            }}
+          >
+            <Image
+              source={require("../assets/mascot2.png")}
+              style={{ width: 200, height: 200, marginTop: -20 }}
+            />
+            <Text
+              style={{
+                ...commonStyles.subtitle2Text,
+                fontSize: 18,
+                fontWeight: "500",
+                margin: 20,
+                textAlign: "center",
+              }}
+            >
+              No available outfits{"\n"} Click below to add outfits!
+            </Text>
+            <TouchableOpacity
+              onPress={() => navigation.navigate("Add")}
+              style={{
+                ...commonStyles.solidButton,
+                marginTop: 4,
+                width: "90%",
+              }}
+            >
+              <Feather name="plus" size={16} color="white" />
+              <Text style={commonStyles.solidButtonText}>Add Item</Text>
+            </TouchableOpacity>
+          </View>
         ) : (
           <FlatList
             data={filteredOutfits}
@@ -156,6 +194,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     marginBottom: 16,
     width: "88%",
+    borderColor: "#D9D9D9",
     backgroundColor: "white",
   },
   outfitCard: {

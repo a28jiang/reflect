@@ -7,6 +7,7 @@ import {
   StyleSheet,
   ActivityIndicator,
   Dimensions,
+  ScrollView,
 } from "react-native";
 import { Camera } from "expo-camera";
 import * as ImagePicker from "expo-image-picker";
@@ -18,11 +19,10 @@ import Swiper from "react-native-swiper";
 import moment from "moment";
 import Toast from "react-native-root-toast";
 
-export const AddScreen = ({ fetchOutfits }) => {
+export const AddScreen = ({ fetchOutfits, user }) => {
   const [hasCameraPermission, setHasCameraPermission] = useState(null);
   const [response, setResponse] = useState(null);
   const [stage, setStage] = useState(1);
-
   useEffect(() => {
     // Request camera permissions when the component mounts
     (async () => {
@@ -35,14 +35,15 @@ export const AddScreen = ({ fetchOutfits }) => {
       const { status } =
         await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (status !== "granted") {
-        console.log(
-          "Sorry, we need camera roll permissions to make this work!"
-        );
+        Toast.show(`❌ Camera roll permissions are required`, {
+          position: Toast.positions.CENTER,
+          backgroundColor: "#BF4D45",
+        });
       }
     })();
   }, []);
 
-  const handleUpload = (input, user_id = 1) => {
+  const handleUpload = (input, user_id) => {
     if (!input.assets.length | !input.assets[0]) {
       return;
     }
@@ -58,9 +59,9 @@ export const AddScreen = ({ fetchOutfits }) => {
       .then((response) => response.json())
       .then((data) => {
         if (!data | (data && !data.length)) {
-          Toast.show(`❌ Error identifying outfits`, {
+          Toast.show(`🔎 No clothing items identified`, {
             position: Toast.positions.CENTER,
-            backgroundColor: "#BF4D45",
+            backgroundColor: "#BF8E45",
           });
           resetStage();
           return;
@@ -69,7 +70,10 @@ export const AddScreen = ({ fetchOutfits }) => {
         setResponse(data);
       })
       .catch((error) => {
-        console.error("Error:", error);
+        Toast.show(`❌ An error occurred while identifying your image`, {
+          position: Toast.positions.CENTER,
+          backgroundColor: "#BF4D45",
+        });
       });
   };
 
@@ -87,10 +91,13 @@ export const AddScreen = ({ fetchOutfits }) => {
       });
 
       if (!result.canceled) {
-        handleUpload(result);
+        handleUpload(result, user.id);
       }
     } else {
-      console.log("Camera permission not granted");
+      Toast.show(`❌ Camera permissions are required`, {
+        position: Toast.positions.CENTER,
+        backgroundColor: "#BF4D45",
+      });
     }
   };
 
@@ -102,15 +109,15 @@ export const AddScreen = ({ fetchOutfits }) => {
     });
 
     if (!result.canceled) {
-      handleUpload(result);
+      handleUpload(result, user.id);
     }
   };
 
-  const handleMatch = async (item, match = null, user_id = 1) => {
+  const handleMatch = async (item, user_id, match = null) => {
     const formData = new FormData();
     formData.append("entry_id", item.id);
     formData.append("name", item.name);
-    formData.append("description", "test description");
+    formData.append("description", `Notes: ${item.name}`);
     if (match) {
       formData.append("outfit_id", match.id);
     }
@@ -125,12 +132,12 @@ export const AddScreen = ({ fetchOutfits }) => {
 
         if (match) {
           Toast.show(`🔍 Successfully matched ${item.name} to ${match.name}`, {
-            position: Toast.positions.CENTER,
+            position: Toast.positions.TOP,
             backgroundColor: "#314F57",
           });
         } else {
           Toast.show(`➕ Successfully created new outfit ${item.name}`, {
-            position: Toast.positions.CENTER,
+            position: Toast.positions.TOP,
             backgroundColor: "#314F57",
           });
         }
@@ -145,7 +152,10 @@ export const AddScreen = ({ fetchOutfits }) => {
         setResponse(newResponse);
       })
       .catch((error) => {
-        console.error("Error:", error);
+        Toast.show(`❌ An error occured during outfit matching`, {
+          position: Toast.positions.CENTER,
+          backgroundColor: "#BF4D45",
+        });
       });
   };
 
@@ -209,100 +219,108 @@ export const AddScreen = ({ fetchOutfits }) => {
                 activeDotStyle={{ backgroundColor: "#314F57" }}
               >
                 {response.map((item) => (
-                  <View key={item.id} style={styles.slide}>
-                    {/* Carousel Item Image */}
-                    <Image
-                      source={{
-                        uri: `data:image/png;base64,${item.features.image}`,
-                      }}
-                      style={styles.carouselImage}
-                    />
+                  <ScrollView style={{ paddingTop: 24 }}>
+                    <View key={item.id} style={styles.slide}>
+                      {/* Carousel Item Image */}
+                      <Image
+                        source={{
+                          uri: `data:image/png;base64,${item.features.image}`,
+                        }}
+                        style={styles.carouselImage}
+                      />
 
-                    <Text
-                      style={{
-                        ...commonStyles.subtitleText,
-                        paddingTop: 18,
-                        paddingBottom: 6,
-                      }}
-                    >
-                      {item.name}
-                    </Text>
-                    <Text
-                      style={{
-                        ...commonStyles.subtitle2Text,
-                        paddingBottom: 12,
-                      }}
-                    >
-                      {`T O P  O U T F I T  M A T C H E S`}
-                    </Text>
-                    {/* Matching Images Grid */}
-                    <View style={styles.gridContainer}>
-                      {item.matches.map(({ outfit, score }) => (
-                        <View style={styles.imageContainer} key={outfit.id}>
-                          <TouchableOpacity
-                            onPress={() => handleMatch(item, outfit)}
-                          >
-                            <Image
-                              source={{
-                                uri: `data:image/png;base64,${outfit.thumbnail}`,
-                              }}
-                              style={styles.gridImage}
-                            />
-                            <Text style={commonStyles.captionText}>
-                              {outfit.name}
-                            </Text>
-                            <Text
-                              style={{
-                                ...commonStyles.captionText,
-                                fontWeight: "400",
-                                paddingBottom: 10,
-                              }}
-                            >
-                              {moment(outfit.last_worn).fromNow()}{" "}
-                            </Text>
-                            <View
-                              style={{ position: "absolute", top: 5, right: 5 }}
-                            >
-                              <Text
-                                style={{
-                                  fontWeight: "600",
-                                  color: "white",
-                                  textShadowColor: "rgba(49,79,87, 0.75)", // Shadow color
-                                  textShadowOffset: { width: 2, height: 2 }, // Shadow offset
-                                  textShadowRadius: 5, // Shadow radius
-                                }}
-                              >
-                                {(score * 100).toFixed(0)}
-                              </Text>
-                            </View>
-                          </TouchableOpacity>
-                        </View>
-                      ))}
-
-                      <TouchableOpacity
-                        onPress={() => handleMatch(item)}
+                      <Text
                         style={{
-                          ...commonStyles.solidButton,
-                          marginTop: 4,
-                          width: "90%",
+                          ...commonStyles.subtitleText,
+                          paddingTop: 18,
+                          paddingBottom: 6,
                         }}
                       >
-                        <Feather name="plus" size={16} color="white" />
-                        <Text style={commonStyles.solidButtonText}>
-                          This is a new Item
-                        </Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        onPress={() => console.log("to implement")}
-                        style={{ ...commonStyles.outlineButton, width: "90%" }}
+                        {item.name}
+                      </Text>
+                      <Text
+                        style={{
+                          ...commonStyles.subtitle2Text,
+                          paddingBottom: 12,
+                        }}
                       >
-                        <Feather name="grid" size={16} color="#314F57" />
-                        <Text style={commonStyles.outlineButtonText}>
-                          Show more Options
-                        </Text>
-                      </TouchableOpacity>
+                        {`T O P  O U T F I T  M A T C H E S`}
+                      </Text>
+                      {/* Matching Images Grid */}
+                      <View style={styles.gridContainer}>
+                        {item.matches.map(({ outfit, score }) => (
+                          <View style={styles.imageContainer} key={outfit.id}>
+                            <TouchableOpacity
+                              onPress={() => handleMatch(item, user.id, outfit)}
+                            >
+                              <Image
+                                source={{
+                                  uri: `data:image/png;base64,${outfit.thumbnail}`,
+                                }}
+                                style={styles.gridImage}
+                              />
+                              <Text style={commonStyles.captionText}>
+                                {outfit.name}
+                              </Text>
+                              <Text
+                                style={{
+                                  ...commonStyles.captionText,
+                                  fontWeight: "400",
+                                  paddingBottom: 10,
+                                }}
+                              >
+                                {moment(outfit.last_worn).fromNow()}{" "}
+                              </Text>
+                              <View
+                                style={{
+                                  position: "absolute",
+                                  top: 5,
+                                  right: 5,
+                                }}
+                              >
+                                <Text
+                                  style={{
+                                    fontWeight: "600",
+                                    color: "white",
+                                    textShadowColor: "rgba(49,79,87, 0.75)", // Shadow color
+                                    textShadowOffset: { width: 2, height: 2 }, // Shadow offset
+                                    textShadowRadius: 5, // Shadow radius
+                                  }}
+                                >
+                                  {(score * 100).toFixed(0)}
+                                </Text>
+                              </View>
+                            </TouchableOpacity>
+                          </View>
+                        ))}
+
+                        <TouchableOpacity
+                          onPress={() => handleMatch(item, user.id)}
+                          style={{
+                            ...commonStyles.solidButton,
+                            marginTop: 4,
+                            width: "90%",
+                          }}
+                        >
+                          <Feather name="plus" size={16} color="white" />
+                          <Text style={commonStyles.solidButtonText}>
+                            This is a new Item
+                          </Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          style={{
+                            ...commonStyles.outlineButton,
+                            width: "90%",
+                          }}
+                        >
+                          <Feather name="grid" size={16} color="#314F57" />
+                          <Text style={commonStyles.outlineButtonText}>
+                            Show more Options
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
                     </View>
-                  </View>
+                  </ScrollView>
                 ))}
               </Swiper>
             ) : (

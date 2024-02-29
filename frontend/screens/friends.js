@@ -17,8 +17,8 @@ export const FriendsScreen = () => (
         Friend Screen under construction 👷👷‍♀️🛠️
       </Text>
       <Image
-        source={require("../assets/mascot2.png")}
-        style={{ width: 200, height: 200, marginTop: 75 }}
+        source={require("../assets/mascot3.png")}
+        style={{ width: 225, height: 200, marginTop: 75 }}
       />
     </View>
   </LinearGradient>
