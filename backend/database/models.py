@@ -20,7 +20,7 @@ class User(Base):
     first_name = Column(String)
     last_name = Column(String)
     email = Column(String, unique=True, index=True)
-    hashed_password = Column(String)
+    password = Column(String)
     is_active = Column(Boolean, default=True)
 
     items = relationship("Item", back_populates="owner")

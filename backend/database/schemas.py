@@ -3,6 +3,11 @@ from datetime import datetime
 from pydantic import BaseModel
 
 
+class UserLogin(BaseModel):
+    email: str
+    password: str
+
+
 class ItemBase(BaseModel):
     title: str
     description: Union[str, None] = None
@@ -22,12 +27,13 @@ class Item(ItemBase):
 
 class UserBase(BaseModel):
     email: str
+    password: str
     first_name: str
     last_name: str
 
 
 class UserCreate(UserBase):
-    password: str
+    pass
 
 
 class EntryBase(BaseModel):

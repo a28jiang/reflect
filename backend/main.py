@@ -43,11 +43,42 @@ def status_check():
     return "server running"
 
 
-@app.post("/users/", response_model=schemas.User)
-def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
-    db_user = crud.get_user_by_email(db, email=user.email)
+@app.post("/login")
+def login_user(
+    user_email: str = Form(...),
+    user_password: str = Form(...),
+    db: Session = Depends(get_db),
+):
+    user = crud.authenticate_user(db, email=user_email, password=user_password)
+
+    if not user:
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid login details",
+        )
+
+    return user
+
+
+@app.post("/users", response_model=schemas.User)
+def create_user(
+    user_email: str = Form(...),
+    user_password: str = Form(...),
+    first_name: str = Form(...),
+    last_name: str = Form(...),
+    db: Session = Depends(get_db),
+):
+    db_user = crud.get_user_by_email(db, email=user_email)
     if db_user:
         raise HTTPException(status_code=400, detail="Email already registered")
+
+    user = schemas.UserCreate(
+        email=user_email,
+        password=user_password,
+        first_name=first_name,
+        last_name=last_name,
+    )
+
     return crud.create_user(db=db, user=user)
 
 

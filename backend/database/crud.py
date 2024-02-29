@@ -17,17 +17,21 @@ def get_users(db: Session, skip: int = 0, limit: int = 100):
 
 
 def create_user(db: Session, user: schemas.UserCreate):
-    fake_hashed_password = user.password + "notreallyhashed"
-    db_user = models.User(
-        email=user.email,
-        first_name=user.first_name,
-        last_name=user.last_name,
-        hashed_password=fake_hashed_password,
-    )
+
+    db_user = models.User(**user.model_dump())
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
     return db_user
+
+
+def authenticate_user(db: Session, email: str, password: str):
+    user = db.query(models.User).filter(models.User.email == email).first()
+
+    if user and user.password == password:
+        return user
+
+    return None
 
 
 def get_items(db: Session, skip: int = 0, limit: int = 100):
