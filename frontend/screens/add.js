@@ -8,21 +8,26 @@ import {
   ActivityIndicator,
   Dimensions,
   ScrollView,
+  TextInput,
+  Button,
 } from "react-native";
 import { Camera } from "expo-camera";
 import * as ImagePicker from "expo-image-picker";
 import { Feather } from "@expo/vector-icons"; // Importing Feather icons
-import { APP_URL } from "../constants";
+import { APP_URL, WS_URL } from "../constants";
 import commonStyles from "../styles";
 import { LinearGradient } from "expo-linear-gradient";
 import Swiper from "react-native-swiper";
 import moment from "moment";
 import Toast from "react-native-root-toast";
+import WS from "react-native-websocket";
 
 export const AddScreen = ({ fetchOutfits, user }) => {
   const [hasCameraPermission, setHasCameraPermission] = useState(null);
   const [response, setResponse] = useState(null);
   const [stage, setStage] = useState(1);
+  const [ws, setWs] = useState();
+
   useEffect(() => {
     // Request camera permissions when the component mounts
     (async () => {
@@ -43,15 +48,39 @@ export const AddScreen = ({ fetchOutfits, user }) => {
     })();
   }, []);
 
-  const handleUpload = (input, user_id) => {
+  const processImageData = (dataUrl) => {
+    if (dataUrl.startsWith("data:image/")) {
+      // Find the position of ;base64,
+      const base64Index = dataUrl.indexOf(";base64,");
+
+      if (base64Index !== -1) {
+        // Extract the substring after ;base64,
+        const base64String = dataUrl.slice(base64Index + ";base64,".length);
+        console.log(base64String);
+        handleUpload(base64String, user.id);
+      } else {
+        console.log("Invalid data URL: Missing ;base64,");
+      }
+    } else {
+      console.log("Invalid data URL: Does not start with data:image/");
+    }
+    // Return null or handle the case when the data URL is not valid
+    return null;
+  };
+
+  const handleUserUpload = (input, user_id) => {
     if (!input.assets.length | !input.assets[0]) {
       return;
     }
-    setStage(2);
     result = input.assets[0];
+    handleUpload(result.base64, user_id);
+  };
+
+  const handleUpload = (input, user_id) => {
+    setStage(2);
 
     const formData = new FormData();
-    formData.append("image", result.base64);
+    formData.append("image", input);
     fetch(`${APP_URL}/upload/?user_id=${user_id}`, {
       method: "POST",
       body: formData,
@@ -74,6 +103,7 @@ export const AddScreen = ({ fetchOutfits, user }) => {
           position: Toast.positions.CENTER,
           backgroundColor: "#BF4D45",
         });
+        setStage(1);
       });
   };
 
@@ -91,7 +121,7 @@ export const AddScreen = ({ fetchOutfits, user }) => {
       });
 
       if (!result.canceled) {
-        handleUpload(result, user.id);
+        handleUserUpload(result, user.id);
       }
     } else {
       Toast.show(`❌ Camera permissions are required`, {
@@ -109,7 +139,7 @@ export const AddScreen = ({ fetchOutfits, user }) => {
     });
 
     if (!result.canceled) {
-      handleUpload(result, user.id);
+      handleUserUpload(result, user.id);
     }
   };
 
@@ -219,8 +249,8 @@ export const AddScreen = ({ fetchOutfits, user }) => {
                 activeDotStyle={{ backgroundColor: "#314F57" }}
               >
                 {response.map((item) => (
-                  <ScrollView style={{ paddingTop: 24 }}>
-                    <View key={item.id} style={styles.slide}>
+                  <ScrollView key={item.id} style={{ paddingTop: 24 }}>
+                    <View style={styles.slide}>
                       {/* Carousel Item Image */}
                       <Image
                         source={{
@@ -345,6 +375,26 @@ export const AddScreen = ({ fetchOutfits, user }) => {
           <Feather name="arrow-left" size={30} color="#314F57" />
         </TouchableOpacity>
       )}
+      <WS
+        ref={(ref) => setWs(ref)}
+        url={WS_URL}
+        onOpen={() => {
+          ws.send(`Initiating connection from ${user.id}`);
+        }}
+        onMessage={(e) => {
+          if (e.data && e.data) {
+            processImageData(e.data);
+          }
+          console.log(e);
+        }}
+        onError={(e) => {
+          console.log(e);
+        }}
+        onClose={(e) => {
+          console.log(e);
+        }}
+        reconnect // Will try to reconnect onClose
+      />
       {renderContent()}
     </LinearGradient>
   );

@@ -2,7 +2,14 @@ from datetime import datetime
 import copy
 from typing import List, Optional
 
-from fastapi import Depends, FastAPI, HTTPException, UploadFile, Form
+from fastapi import (
+    Depends,
+    FastAPI,
+    HTTPException,
+    Form,
+    WebSocket,
+    WebSocketDisconnect,
+)
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 import numpy as np
@@ -14,6 +21,7 @@ from backend.database.database import SessionLocal, engine
 # Import the necessary external modules
 from recognition.recognition import extractPhotoFeatures
 from recognition.compare import compareFeatures
+
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -28,6 +36,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# List to store connected WebSocket clients
+websocket_clients: List[WebSocket] = []
+
 
 # Dependency
 def get_db():
@@ -41,6 +52,33 @@ def get_db():
 @app.get("/")
 def status_check():
     return "server running"
+
+
+@app.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket):
+    await websocket.accept()
+
+    # Add the connected WebSocket to the list
+    websocket_clients.append(websocket)
+
+    try:
+        while True:
+            data = await websocket.receive_text()
+            print("Received:", data)
+
+            # Broadcast the received message to all connected clients
+            for client in websocket_clients:
+                await client.send_text(data)
+    except WebSocketDisconnect as e:
+        print(f"WebSocket closed by client: {e}")
+    except Exception as e:
+        print(f"Unexpected error: {e}")
+    finally:
+        try:
+            websocket_clients.remove(websocket)
+            await websocket.close()
+        except Exception as e:
+            print(f"Websocket already closed: {e}")
 
 
 @app.post("/login")
