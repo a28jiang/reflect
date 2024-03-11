@@ -22,6 +22,7 @@ import { useNavigation } from "@react-navigation/native";
 export const ClosetScreen = ({ refreshing, fetchOutfits, outfits }) => {
   const [selectedFilter, setSelectedFilter] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
+  const [outfit, setOutfit] = useState("");
 
   const navigation = useNavigation();
   const filteredOutfits = outfits.filter((item) => {
@@ -32,12 +33,17 @@ export const ClosetScreen = ({ refreshing, fetchOutfits, outfits }) => {
     }
   });
 
-  const isFocus = filteredOutfits.length == 1;
+  const isFocus =
+    outfit != null
+      ? outfit
+      : filteredOutfits.length == 1
+      ? filteredOutfits[0]
+      : null;
 
   const resetCloset = () => {
     setSearchQuery("");
     setSelectedFilter("All");
-    fetchOutfits();
+    setOutfit(null);
   };
 
   const filterButtons = [
@@ -104,7 +110,8 @@ export const ClosetScreen = ({ refreshing, fetchOutfits, outfits }) => {
           <ScrollView showsVerticalScrollIndicator={false}>
             <FocusOutfit
               resetCloset={resetCloset}
-              outfit={filteredOutfits[0]}
+              outfit={isFocus}
+              fetchOutfits={fetchOutfits}
             />
           </ScrollView>
         ) : filteredOutfits.length == 0 ? (
@@ -158,7 +165,10 @@ export const ClosetScreen = ({ refreshing, fetchOutfits, outfits }) => {
             renderItem={({ item }) => (
               <TouchableOpacity
                 style={styles.outfitImage}
-                onPress={() => setSearchQuery(item.name)}
+                onPress={() => {
+                  setSearchQuery(item.name);
+                  setOutfit(item);
+                }}
               >
                 {/* Display outfit thumbnail and name */}
                 <Image

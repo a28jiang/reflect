@@ -181,6 +181,11 @@ def read_outfit(outfit_id: int, db: Session = Depends(get_db)):
 @app.get("/outfits/", response_model=List[schemas.Outfit])
 def read_all_outfits(user_id: int, limit: int = 10, db: Session = Depends(get_db)):
     outfits = crud.get_all_outfits(db, user_id=user_id, limit=limit)
+    outfits = sorted(
+        outfits,
+        key=lambda outfit: outfit.last_worn or datetime.datetime.min,
+        reverse=True,
+    )
     return outfits
 
 

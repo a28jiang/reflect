@@ -17,7 +17,7 @@ import commonStyles from "../styles";
 import Toast from "react-native-root-toast";
 import { APP_URL } from "../constants";
 
-export const FocusOutfit = ({ outfit, resetCloset }) => {
+export const FocusOutfit = ({ outfit, resetCloset, fetchOutfits }) => {
   const [name, setName] = useState(outfit.name);
   const [description, setDescription] = useState(outfit.description);
 
@@ -38,6 +38,7 @@ export const FocusOutfit = ({ outfit, resetCloset }) => {
           position: Toast.positions.CENTER,
           backgroundColor: "#314F57",
         });
+        fetchOutfits();
       })
       .catch(() => {
         Toast.show(`❌ Error updating outfit`, {
@@ -61,6 +62,7 @@ export const FocusOutfit = ({ outfit, resetCloset }) => {
           position: Toast.positions.CENTER,
           backgroundColor: "#314F57",
         });
+        fetchOutfits();
       })
       .catch(() => {
         Toast.show(`❌ Error deleting outfit`, {
@@ -140,7 +142,7 @@ export const FocusOutfit = ({ outfit, resetCloset }) => {
                 paddingBottom: 10,
               }}
             >
-              {moment(entry.last_worn).fromNow()}{" "}
+              {moment(entry.date_created).fromNow()}
             </Text>
           </View>
         ))}
