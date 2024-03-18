@@ -161,12 +161,25 @@ export const LoginScreen = ({ setUser }) => {
                 ...commonStyles.outlineButtonText,
                 textDecorationLine: "underline",
                 paddingTop: 16,
-                paddingBottom: 200,
+                paddingBottom: 48,
               }}
             >
               {"Use Demo Account"}
             </Text>
           </TouchableOpacity>
+          <Text
+            style={{
+              ...commonStyles.captionText,
+              fontWeight: 400,
+              padding: 16,
+              paddingBottom: 160,
+            }}
+          >
+            Reflect utilizes the camera to capture images of your outfits. Only
+            pictures of your clothing will be required. User data and personally
+            identifying features (non-clothing) will not be captured nor stored.
+            You can request deletion of your data at any time.
+          </Text>
         </View>
       </ScrollView>
     </LinearGradient>
